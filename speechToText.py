@@ -3,6 +3,8 @@ import os
 from google.cloud import speech
 from google.cloud import storage
 
+from models.NLP_keyword_extraction import keyword_extraction
+
 
 def implicit():
     credential_path = r"C:\Users\Caroline\Documents\speechtosignlanguage-6e915acd4265.json"
@@ -38,7 +40,7 @@ def speech_to_text(audio, gcs_uri):
         encoding=speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED,
         sample_rate_hertz=44100,
         audio_channel_count=2,
-        language_code="en-US",
+        language_code="de-DE",
     )
 
     operation = client.long_running_recognize(config=config, audio=audio)
@@ -48,4 +50,5 @@ def speech_to_text(audio, gcs_uri):
 
     for result in response.results:
         print(u"Transcript: {}".format(result.alternatives[0].transcript))
+        keyword_extraction(result.alternatives[0].transcript)
         print("Confidence: {}".format(result.alternatives[0].confidence))

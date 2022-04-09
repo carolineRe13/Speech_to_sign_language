@@ -48,7 +48,9 @@ def speech_to_text(audio, gcs_uri):
     print("Waiting for operation to complete...")
     response = operation.result(timeout=90)
 
+    # Todo: check response in api
     for result in response.results:
         print(u"Transcript: {}".format(result.alternatives[0].transcript))
         keyword_extraction(result.alternatives[0].transcript)
         print("Confidence: {}".format(result.alternatives[0].confidence))
+    return response.results[0].alternatives[0].transcript

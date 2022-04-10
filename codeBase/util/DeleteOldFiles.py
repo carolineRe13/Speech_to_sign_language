@@ -2,13 +2,13 @@ import os
 import time
 
 
-def print_date_time(folder):
+def delete_files():
     """
     deletes files that are older than 5 minutes
     """
     five_minute_ago = time.time() - 5 * 60
-    os.chdir(folder)
-    for file in os.listdir('..'):
+    os.chdir('../results')
+    for file in os.listdir('../results'):
         st = os.stat(file)
         file_age = st.st_mtime
         if file_age < five_minute_ago:

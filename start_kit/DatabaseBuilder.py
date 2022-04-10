@@ -26,6 +26,7 @@ def add_text_to_video(file_path, dst, subtitle):
                            codec="mpeg4", audio_codec="aac")
 
 
+# could replace generated text videos
 def create_database():
     args = sys.argv[1:]
 

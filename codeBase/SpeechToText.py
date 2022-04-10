@@ -3,7 +3,7 @@ import os
 from google.cloud import speech
 from google.cloud import storage
 
-from models.NLP_keyword_extraction import keyword_extraction
+from model.NLPKeywordExtraction import keyword_extraction
 
 
 def implicit():
@@ -38,9 +38,9 @@ def speech_to_text(audio, gcs_uri):
 
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED,
-        sample_rate_hertz=44100,
+        sample_rate_hertz=16000,
         audio_channel_count=2,
-        language_code="de-DE",
+        language_code="en-US",
     )
 
     operation = client.long_running_recognize(config=config, audio=audio)

@@ -3,7 +3,7 @@ import re
 import uuid
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask, Response
+from flask import Flask, Response, jsonify
 from flask import request
 
 from codeBase.TextToASL import video_paths
@@ -21,7 +21,7 @@ app = Flask(__name__)
 
 @app.route("/speech_to_ASL", methods=['POST'])
 def speech_to_ASL():
-    video_id = str(uuid.UUID)
+    video_id = str(uuid.uuid1())
     f = request.files['audio_data']
     with open('audio.wav', 'wb') as audio:
         f.save(audio)
@@ -31,7 +31,7 @@ def speech_to_ASL():
     video_paths_list = video_paths(text_with_keywords)
     print(video_paths_list)
     concatenate_videos(video_paths_list, VIDEO_RESULTS_FOLDER, video_id)
-    return video_id
+    return jsonify({"success": True, "message": video_id}), 201
 
 
 @app.after_request
@@ -41,7 +41,7 @@ def after_request(response):
 
 
 def get_chunk(video_id, byte1=None, byte2=None):
-    full_path = 'result' + video_id + '.mp4'
+    full_path = 'results/' + video_id + '.mp4'
     file_size = os.stat(full_path).st_size
     start = 0
 

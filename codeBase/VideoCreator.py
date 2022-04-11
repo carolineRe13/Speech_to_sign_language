@@ -31,7 +31,7 @@ def concatenate_videos(video_clip_paths, output_folder_path, uuid, method="compo
         # concatenate the final video with the compose method provided by moviepy
         final_clip = concatenate_videoclips(clips, method="compose")
     # write the output video file
-    final_clip.write_videofile(output_folder_path + '/' + uuid + '.mp4', fps=30, threads=1, codec="libx264")
+    final_clip.write_videofile(output_folder_path + '/' + str(uuid) + '.mp4', fps=30, threads=1, codec="libx264")
 
 
 # install GTK+
@@ -48,7 +48,7 @@ def create_video_with_text(text):
         text_object.draw(surface)
         return surface.get_npimage()
 
-    text = mpy.VideoClip(render_text, duration=10)
+    text = mpy.VideoClip(render_text, duration=1)
     if not os.path.exists(output_folder_path):
         os.makedirs(output_folder_path)
 
@@ -59,7 +59,7 @@ def create_video_with_text(text):
         size=(640, 480)). \
         on_color(
         color=(0, 0, 0),
-        col_opacity=1).set_duration(10)
+        col_opacity=1).set_duration(1)
 
     video_with_text.write_videofile(output_folder_path + '/text.mp4', fps=30, codec="mpeg4", audio_codec="aac")
 

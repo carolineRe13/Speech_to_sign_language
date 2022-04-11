@@ -25,7 +25,7 @@ def video_paths(text):
         else:
             print('Did not find (', word, ') in database')
             create_video_with_text(word)
-            videos.append(path + '.mp4')
+            videos.append(path + '/text.mp4')
     return videos
 
 

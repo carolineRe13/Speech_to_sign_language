@@ -38,7 +38,7 @@ def speech_to_text(audio, gcs_uri):
 
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED,
-        sample_rate_hertz=16000,
+        sample_rate_hertz=44100,
         audio_channel_count=2,
         language_code="en-US",
     )

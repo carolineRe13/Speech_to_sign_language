@@ -3,7 +3,7 @@ import spacy
 
 
 def keyword_extraction_removed_from_sentence(text_to_analyse):
-    natural_language_processor = spacy.load('en_core_web_lg')
+    natural_language_processor = spacy.load('en_core_web_sm')
     parsed_text = natural_language_processor(text_to_analyse)
 
     list_of_words_to_remove = []

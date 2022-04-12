@@ -2,8 +2,9 @@ import os
 
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.video.io.VideoFileClip import VideoFileClip
-import gizeh as gz
+from PIL import Image, ImageDraw
 import moviepy.editor as mpy
+import numpy as np
 
 
 def concatenate_videos(video_clip_paths, output_folder_path, uuid, method="compose"):
@@ -31,7 +32,7 @@ def concatenate_videos(video_clip_paths, output_folder_path, uuid, method="compo
         # concatenate the final video with the compose method provided by moviepy
         final_clip = concatenate_videoclips(clips, method="compose")
     # write the output video file
-    final_clip.write_videofile(output_folder_path + '/' + str(uuid) + '.mp4', fps=30, threads=1, codec="libx264")
+    final_clip.write_videofile(output_folder_path + '/' + uuid + '.mp4', fps=30, threads=1, codec="libx264")
 
 
 # install GTK+
@@ -39,16 +40,21 @@ def create_video_with_text(text):
     """if a word is missing then we create a video displaying the word"""
     output_folder_path = '../database/' + text
 
-    def render_text(t):
-        surface = gz.Surface(640, 60, bg_color=(0, 0, 0))
-        # TODO doesnt work with text instead of 'test'
-        text_object = gz.text(
-            'test', fontfamily="Charter",
-            fontsize=30, fontweight='bold', fill=(211, 211, 211), xy=(320, 40))
-        text_object.draw(surface)
-        return surface.get_npimage()
+    img = Image.new('RGB', (640, 60), color=(0, 0, 0))
 
-    text = mpy.VideoClip(render_text, duration=1)
+    d = ImageDraw.Draw(img)
+    d.text((320, 40), text, fill=(211, 211, 211))
+
+    pixels = list(img.getdata())
+    width, height = img.size
+    pixels = [pixels[i * width:(i + 1) * width] for i in range(height)]
+
+    frame = np.asarray(pixels)
+
+    def make_frame(t):
+        return frame
+
+    text = mpy.VideoClip(make_frame, duration=1)
     if not os.path.exists(output_folder_path):
         os.makedirs(output_folder_path)
 
@@ -59,7 +65,7 @@ def create_video_with_text(text):
         size=(640, 480)). \
         on_color(
         color=(0, 0, 0),
-        col_opacity=1).set_duration(1)
+        col_opacity=1).set_duration(10)
 
     video_with_text.write_videofile(output_folder_path + '/text.mp4', fps=30, codec="mpeg4", audio_codec="aac")
 

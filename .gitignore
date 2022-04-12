@@ -2,3 +2,4 @@
 .idea
 *.xml
 /database
+*__pycache__

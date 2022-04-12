@@ -5,6 +5,7 @@ import uuid
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, Response, jsonify
 from flask import request
+from flask_cors import CORS, cross_origin
 
 from codeBase.TextToASL import video_paths
 from codeBase.VideoCreator import concatenate_videos
@@ -18,20 +19,24 @@ VIDEO_RESULTS_FOLDER = '../results'
 
 app = Flask(__name__)
 
-
 @app.route("/speech_to_ASL", methods=['POST'])
 def speech_to_ASL():
-    video_id = str(uuid.uuid1())
+    session_id = str(uuid.uuid4())
     f = request.files['audio_data']
-    with open('audio.wav', 'wb') as audio:
+    audio_file_name = session_id + '.wav'
+    with open(audio_file_name, 'wb') as audio:
         f.save(audio)
     print('file saved successfully')
-    text = speech_to_text('audio.wav', 'gs://speech_to_sign_bucket/audio.wav')
+    text = speech_to_text(audio_file_name, 'gs://speech_to_sign_bucket/' + audio_file_name)
+
     text_with_keywords = keyword_extraction_removed_from_sentence(text)
     video_paths_list = video_paths(text_with_keywords)
     print(video_paths_list)
-    concatenate_videos(video_paths_list, VIDEO_RESULTS_FOLDER, video_id)
-    return jsonify({"success": True, "message": video_id}), 201
+    concatenate_videos(video_paths_list, VIDEO_RESULTS_FOLDER, session_id)
+
+    return {
+        "video_id": session_id
+    }
 
 
 @app.after_request
@@ -41,7 +46,7 @@ def after_request(response):
 
 
 def get_chunk(video_id, byte1=None, byte2=None):
-    full_path = 'results/' + video_id + '.mp4'
+    full_path = '../results/' + video_id + '.mp4'
     file_size = os.stat(full_path).st_size
     start = 0
 
@@ -58,8 +63,9 @@ def get_chunk(video_id, byte1=None, byte2=None):
     return chunk, start, length, file_size
 
 
-@app.route("/video", methods=['GET'])
+@app.route("/video/<video_id>")
 def steam_resulting_video(video_id):
+    print(video_id)
     range_header = request.headers.get('Range', None)
     byte1, byte2 = 0, None
     if range_header:
@@ -82,6 +88,8 @@ if __name__ == "__main__":
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=delete_files, trigger="interval", seconds=60)
     scheduler.start()
+
+    cors = CORS(app, origins="*", send_wildcard=True, expose_headers='*')
     app.run(debug=True, threaded=True)
 
     # Shut down the scheduler when exiting the app

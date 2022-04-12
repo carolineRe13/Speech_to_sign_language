@@ -7,7 +7,7 @@ from model.NLPKeywordExtraction import keyword_extraction_removed_from_sentence
 
 
 def implicit():
-    credential_path = r"C:\Users\Caroline\Documents\speechtosignlanguage-6e915acd4265.json"
+    credential_path = r"C:\Users\Caroline\Documents\speechtosignlanguage-f7bb5dfe5dce.json"
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
 
 
@@ -27,18 +27,18 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     )
 
 
-def speech_to_text(audio, gcs_uri):
+def speech_to_text(audio_file_name, gcs_uri):
     """Converts speech to text by using the Google api."""
     implicit()
 
-    upload_blob("speech_to_sign_bucket", audio, os.path.basename(gcs_uri))
+    upload_blob("speech_to_sign_bucket", audio_file_name, os.path.basename(gcs_uri))
     client = speech.SpeechClient()
 
     audio = speech.RecognitionAudio(uri=gcs_uri)
 
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.ENCODING_UNSPECIFIED,
-        sample_rate_hertz=44100,
+        sample_rate_hertz=48000,
         audio_channel_count=2,
         language_code="en-US",
     )
@@ -50,7 +50,8 @@ def speech_to_text(audio, gcs_uri):
 
     # Todo: check response in api
     for result in response.results:
-        print(u"Transcript: {}".format(result.alternatives[0].transcript))
-        keyword_extraction_removed_from_sentence(result.alternatives[0].transcript)
-        print("Confidence: {}".format(result.alternatives[0].confidence))
+        for alternative in result.alternatives:
+            print(u"Transcript: {}".format(alternative.transcript))
+            print("Confidence: {}".format(alternative.confidence))
+
     return response.results[0].alternatives[0].transcript

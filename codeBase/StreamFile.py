@@ -2,7 +2,7 @@ import os
 import re
 
 from flask import Response, request
-from flask_skeleton.skeleton.wsgi import app
+# from flask_skeleton.skeleton.wsgi import app
 
 
 @app.after_request

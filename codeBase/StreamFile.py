@@ -2,16 +2,17 @@ import os
 import re
 
 from flask import Response, request
-# from flask_skeleton.skeleton.wsgi import app
 
 
 @app.after_request
 def after_request(response):
+    """"""
     response.headers.add('Accept-Ranges', 'bytes')
     return response
 
 
 def get_chunk(byte1=None, byte2=None):
+    """"""
     full_path = "../results/test111.mp4"
     file_size = os.stat(full_path).st_size
     start = 0
@@ -31,6 +32,7 @@ def get_chunk(byte1=None, byte2=None):
 
 @app.route('/video')
 def get_file():
+    """"""
     range_header = request.headers.get('Range', None)
     byte1, byte2 = 0, None
     if range_header:

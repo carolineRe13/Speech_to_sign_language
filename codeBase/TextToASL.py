@@ -1,42 +1,56 @@
 import os.path
+import random
 
-from codeBase.VideoCreator import concatenate_videos, create_video_with_text
+
+from codeBase.VideoCreator import create_video_with_text
 
 
 def video_paths(text):
+    """Returns video paths to all the words in text"""
     words = text.split(' ')
 
-    videos = []
-
-    multiple_words = ""
-
-    for word in words:
-        path = '../database/' + word
-
-        if os.path.exists(path):
-            print('Found (', word, ') in database')
-            print(os.listdir(path))
-            folder_content = os.listdir(path)
-            if len(folder_content) > 0:  # TODO handle folders with sub-folders "come here"
-                video_path = path + '/' + pick_video(folder_content)
-                print(video_path)
-                videos.append(video_path)
-
-        else:
-            print('Did not find (', word, ') in database')
-            create_video_with_text(word)
-            videos.append(path + '/text.mp4')
-    return videos
+    return test(words, 0, '../database', '../database', '')
 
 
-def pick_video(folder_content):
-    for item in folder_content:
-        if item.endswith('.mp4'):
-            return item
-    return 'test'
+def test(words, index, database, path, sign):
+    if index == len(words):
+        return []
+
+    word = words[index]
+    sign += ' ' + word
+    sign = sign.strip(' ')
+
+    current_path = path + '/' + word
+    if not os.path.exists(current_path):
+        os.mkdir(current_path)
+
+    folder_content = os.listdir(current_path)
+    print('folder_content', folder_content)
+    subfolders = list(filter(lambda item: not item.endswith('.mp4'), folder_content))
+    videos = list(filter(lambda item: item.endswith('.mp4'), folder_content))
+
+    if len(subfolders) > 0 and index + 1 < len(words) and words[index+1] in subfolders:
+        # app.logger.info('Found (', sign, words[index+1], ') in database')
+        print('A Found (', sign, words[index+1], ') in database')
+        return test(words, index+1, database, current_path, sign)
+    elif len(videos) == 0:
+        # app.logger.info('Creating (', sign, ') in database')
+        print('Creating (', sign, ') in database')
+        results = [create_video_with_text(sign)]
+        results.extend(test(words, index + 1, database, database, ''))
+        return results
+    else:
+        # app.logger.info('Found (', sign, ') in database')
+        print('B Found (', sign, ') in database')
+        results = [current_path + '/' + pick_video(videos)]
+        results.extend(test(words, index + 1, database, database, ''))
+        return results
+
+
+def pick_video(videos):
+    """Picks a random mp4 video from the folder"""
+    return random.choice(videos)
 
 
 if __name__ == "__main__":
-    # video_paths('This is a test with a dog. a lot')
-    paths = video_paths('This is a test with a dog.')
-    concatenate_videos(paths, '../results')
+    print(video_paths("don't care"))

@@ -3,9 +3,9 @@ import re
 import uuid
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask, Response, jsonify
+from flask import Flask, Response
 from flask import request
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 from codeBase.TextToASL import video_paths
 from codeBase.VideoCreator import concatenate_videos
@@ -19,15 +19,20 @@ VIDEO_RESULTS_FOLDER = '../results'
 
 app = Flask(__name__)
 
+
 @app.route("/speech_to_ASL", methods=['POST'])
 def speech_to_ASL():
     session_id = str(uuid.uuid4())
     f = request.files['audio_data']
-    audio_file_name = session_id + '.wav'
-    with open(audio_file_name, 'wb') as audio:
+    audio_file_path = '../results/' + session_id + '.wav'
+    with open(audio_file_path, 'wb') as audio:
         f.save(audio)
+        frame_rate = audio.getframerate()
     print('file saved successfully')
-    text = speech_to_text(audio_file_name, 'gs://speech_to_sign_bucket/' + audio_file_name)
+    text = speech_to_text(audio_file_path, 'gs://speech_to_sign_bucket/' + audio_file_path, frame_rate)
+
+    if not text:
+        return
 
     text_with_keywords = keyword_extraction_removed_from_sentence(text)
     video_paths_list = video_paths(text_with_keywords)

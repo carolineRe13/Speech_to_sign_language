@@ -8,15 +8,13 @@ import numpy as np
 
 
 def concatenate_videos(video_clip_paths, output_folder_path, uuid, method="compose"):
-    """Concatenates several video files into one video file
-    and save it to `output_path`. Note that extension (mp4, etc.) must be added to `output_path`
-    `method` can be either 'compose' or 'reduce':
+    """ Concatenates several video files and save it to `output_path_folder`.
+        `method` can be either 'compose' or 'reduce':
         `reduce`: Reduce the quality of the video to the lowest quality on the list of `video_clip_paths`.
-        `compose`: type help(concatenate_videoclips) for the info"""
+        `compose`: type help(concatenate_videoclips) for the info
+    """
     if not os.path.exists(output_folder_path):
         os.makedirs(output_folder_path)
-
-    output_path = output_folder_path + '/resultingVideo'
 
     # create VideoFileClip object for each video file
     clips = [VideoFileClip(c) for c in video_clip_paths]
@@ -35,7 +33,6 @@ def concatenate_videos(video_clip_paths, output_folder_path, uuid, method="compo
     final_clip.write_videofile(output_folder_path + '/' + uuid + '.mp4', fps=30, threads=1, codec="libx264")
 
 
-# install GTK+
 def create_video_with_text(text):
     """if a word is missing then we create a video displaying the word"""
     output_folder_path = '../database/' + text
@@ -55,6 +52,7 @@ def create_video_with_text(text):
         return frame
 
     text = mpy.VideoClip(make_frame, duration=1)
+
     if not os.path.exists(output_folder_path):
         os.makedirs(output_folder_path)
 
@@ -67,7 +65,9 @@ def create_video_with_text(text):
         color=(0, 0, 0),
         col_opacity=1).set_duration(10)
 
-    video_with_text.write_videofile(output_folder_path + '/text.mp4', fps=30, codec="mpeg4", audio_codec="aac")
+    video_path = output_folder_path + '/text.mp4'
+    video_with_text.write_videofile(video_path, fps=30, codec="mpeg4", audio_codec="aac")
+    return video_path
 
 
 if __name__ == "__main__":

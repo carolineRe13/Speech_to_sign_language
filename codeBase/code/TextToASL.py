@@ -9,7 +9,7 @@ def video_paths(text):
     """Returns video paths to all the words in text"""
     words = text.split(' ')
 
-    return test(words, 0, '../database', '../../database', '')
+    return test(words, 0, '../database', '../database', '')
 
 
 def test(words, index, database, path, sign):
@@ -35,7 +35,7 @@ def test(words, index, database, path, sign):
     elif len(videos) == 0:
         # app.logger.info('Creating (', sign, ') in database')
         print('Creating (', sign, ') in database')
-        results = [create_video_with_text(sign), '../database/']
+        results = [create_video_with_text(sign, database)]
         results.extend(test(words, index + 1, database, database, ''))
         return results
     else:

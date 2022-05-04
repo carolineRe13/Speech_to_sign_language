@@ -1,17 +1,16 @@
 import os
 
-from flask import logging, app
 from google.cloud import speech
 from google.cloud import storage
 
 
 def implicit():
     # personal access, replace with access to your project json
-    credential_path = r"C:\Users\Caroline\Documents\speechtosignlanguage-f7bb5dfe5dce.json"
+    credential_path = "../keys/googleCloud.json"
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
 
 
-def upload_blob(bucket_name, source_file_name, destination_blob_name):
+def upload_blob(app, bucket_name, source_file_name, destination_blob_name):
     """ Uploads a file to the Google bucket. """
 
     storage_client = storage.Client()
@@ -26,14 +25,13 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
     )
 
 
-def speech_to_text(audio_file_name, gcs_uri, frame_rate):
+def speech_to_text(app, audio_file_name, gcs_uri, frame_rate):
     """ Converts speech to text by using the Google api.
     Text with highest confidence is returned or an empty string if there are no results.
     """
-    response_with_highest_confidence = None
     implicit()
 
-    upload_blob("speech_to_sign_bucket", audio_file_name, os.path.basename(gcs_uri))
+    upload_blob(app, "speech_to_sign_bucket", audio_file_name, os.path.basename(gcs_uri))
     client = speech.SpeechClient()
 
     audio = speech.RecognitionAudio(uri=gcs_uri)
@@ -52,11 +50,13 @@ def speech_to_text(audio_file_name, gcs_uri, frame_rate):
     if len(response.results) < 1:
         return ""
 
-    response_with_highest_confidence = response.results[0].alternatives[0].transcript
+    best_alternative = response.results[0].alternatives[0]
+
+    print(response.results)
 
     for result in response.results:
         for alternative in result.alternatives:
-            if alternative.confidence > response_with_highest_confidence:
-                response_with_highest_confidence = alternative.transcript
+            if alternative.confidence > best_alternative.confidence:
+                best_alternative = alternative
 
-    return response_with_highest_confidence
+    return best_alternative.transcript

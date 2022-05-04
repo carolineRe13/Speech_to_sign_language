@@ -3,3 +3,5 @@
 *.xml
 /database
 *__pycache__
+/keys/*
+*.mp4

@@ -1,10 +1,9 @@
 import spacy
-from flask import app
 
 STATE_OF_BEING_VERBS = ['is', 'am', 'was', 'are', 'were', 'being', 'be', 'been']
 
 
-def keyword_extraction_removed_from_sentence(text_to_analyse):
+def keyword_extraction_removed_from_sentence(app, text_to_analyse):
     """
         This method filters out words from a text which are not used in ASL
         Those words are state of being verbs and articles
@@ -23,10 +22,10 @@ def keyword_extraction_removed_from_sentence(text_to_analyse):
             if any(x == text.text for x in STATE_OF_BEING_VERBS):
                 list_of_words_to_remove.append(text.orth_.lower())
 
-    return remove_non_keywords_from_sentence(list_of_words_to_remove, text_to_analyse)
+    return remove_non_keywords_from_sentence(app, list_of_words_to_remove, text_to_analyse)
 
 
-def remove_non_keywords_from_sentence(keywords_to_remove, text_to_analyse):
+def remove_non_keywords_from_sentence(app, keywords_to_remove, text_to_analyse):
     """
         Words are removed from original text
     """

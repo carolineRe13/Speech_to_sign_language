@@ -16,7 +16,8 @@ def add_text_to_video(file_path, dst, subtitle):
     """
     clip = VideoFileClip(file_path)
     # Generate a text clip
-    txt_clip = TextClip(subtitle, fontsize=(clip.w / len(subtitle)) - 1, color='grey')
+
+    txt_clip = TextClip(subtitle, fontsize=(clip.h * 40 / 540), color='grey')
 
     # setting position
     txt_clip = txt_clip.set_pos(('center', 'bottom')).set_duration(clip.duration)

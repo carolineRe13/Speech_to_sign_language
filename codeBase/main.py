@@ -12,6 +12,7 @@ from codeBase.code.VideoCreator import concatenate_videos
 from codeBase.util.DeleteOldFiles import delete_files
 from model.NLPKeywordExtraction import keyword_extraction_removed_from_sentence
 from codeBase.code.SpeechToText import speech_to_text
+from scipy.io.wavfile import read as read_wav
 
 import atexit
 
@@ -27,18 +28,19 @@ def speech_to_ASL():
     """
     session_id = str(uuid.uuid4())
     f = request.files['audio_data']
-    audio_file_path = '../results/' + session_id + '.wav'
+    audio_file_name = session_id + '.wav'
+    audio_file_path = '../results/' + audio_file_name
     with open(audio_file_path, 'wb') as audio:
         f.save(audio)
-        frame_rate = audio.getframerate()
+        sampling_rate, data = read_wav(audio_file_path)
     app.logger.info('file saved successfully')
-    text = speech_to_text(audio_file_path, 'gs://speech_to_sign_bucket/' + audio_file_path, frame_rate)
+    text = speech_to_text(app, audio_file_path, 'gs://speech_to_sign_bucket/' + audio_file_name, sampling_rate)
 
     # in case there are no results from the Google api
     if not text:
-        return
+        return {}
 
-    text_with_keywords = keyword_extraction_removed_from_sentence(text)
+    text_with_keywords = keyword_extraction_removed_from_sentence(app, text)
     video_paths_list = video_paths(text_with_keywords)
     print(video_paths_list)
     concatenate_videos(video_paths_list, VIDEO_RESULTS_FOLDER, session_id)

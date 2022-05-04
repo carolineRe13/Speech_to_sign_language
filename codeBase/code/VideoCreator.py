@@ -2,12 +2,15 @@ import os
 
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.video.io.VideoFileClip import VideoFileClip
-from PIL import Image, ImageDraw
+from PIL import ImageFont, Image, ImageDraw
 import moviepy.editor as mpy
 import numpy as np
 
+WIDTH = 960
+HEIGHT = 540
 
-def concatenate_videos(video_clip_paths, output_folder_path, uuid, method="compose"):
+
+def concatenate_videos(video_clip_paths, output_folder_path, uuid):
     """ Concatenates several video files and save it to `output_path_folder`.
         `method` can be either 'compose' or 'reduce':
         `reduce`: Reduce the quality of the video to the lowest quality on the list of `video_clip_paths`.
@@ -18,29 +21,26 @@ def concatenate_videos(video_clip_paths, output_folder_path, uuid, method="compo
 
     # create VideoFileClip object for each video file
     clips = [VideoFileClip(c) for c in video_clip_paths]
-    if method == "reduce":
-        # calculate minimum width & height across all clips
-        min_height = min([c.h for c in clips])
-        min_width = min([c.w for c in clips])
-        # resize the videos to the minimum
-        clips = [c.resize(newsize=(min_width, min_height)) for c in clips]
-        # concatenate the final video
-        final_clip = concatenate_videoclips(clips)
-    elif method == "compose":
-        # concatenate the final video with the compose method provided by moviepy
-        final_clip = concatenate_videoclips(clips, method="compose")
+
+    # resize the videos to the maximum
+    clips = [c.resize(newsize=(WIDTH, HEIGHT)) for c in clips]
+    # concatenate the final video
+    final_clip = concatenate_videoclips(clips)
+
     # write the output video file
-    final_clip.write_videofile(output_folder_path + '/' + uuid + '.mp4', fps=30, threads=1, codec="libx264")
+    final_clip.write_videofile(output_folder_path + '/' + uuid + '.mp4', fps=24, threads=1, codec="libx264")
 
 
 def create_video_with_text(text, database_path):
     """if a word is missing then we create a video displaying the word"""
-    output_folder_path = database_path + text
+    output_folder_path = database_path + "/" + text
 
-    img = Image.new('RGB', (640, 60), color=(0, 0, 0))
+    img = Image.new('RGB', (WIDTH, HEIGHT), color=(0, 0, 0))
 
     d = ImageDraw.Draw(img)
-    d.text((320, 40), text, fill=(211, 211, 211))
+
+    font = ImageFont.truetype("arial.ttf", 40)
+    d.text((WIDTH/2, HEIGHT/2), text, font=font, fill=(255, 255, 255), anchor="mm")
 
     pixels = list(img.getdata())
     width, height = img.size
@@ -63,7 +63,7 @@ def create_video_with_text(text, database_path):
         size=(640, 480)). \
         on_color(
         color=(0, 0, 0),
-        col_opacity=1).set_duration(10)
+        col_opacity=1).set_duration(1)
 
     video_path = output_folder_path + '/text.mp4'
     video_with_text.write_videofile(video_path, fps=30, codec="mpeg4", audio_codec="aac")

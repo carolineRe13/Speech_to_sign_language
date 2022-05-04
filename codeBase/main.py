@@ -7,11 +7,11 @@ from flask import Flask, Response
 from flask import request
 from flask_cors import CORS
 
-from codeBase.TextToASL import video_paths
-from codeBase.VideoCreator import concatenate_videos
+from codeBase.code.TextToASL import video_paths
+from codeBase.code.VideoCreator import concatenate_videos
 from codeBase.util.DeleteOldFiles import delete_files
 from model.NLPKeywordExtraction import keyword_extraction_removed_from_sentence
-from SpeechToText import speech_to_text
+from codeBase.code.SpeechToText import speech_to_text
 
 import atexit
 
@@ -22,15 +22,19 @@ app = Flask(__name__)
 
 @app.route("/speech_to_ASL", methods=['POST'])
 def speech_to_ASL():
+    """
+    Saves the recorded voice message and returns a unique video_id to identify the session
+    """
     session_id = str(uuid.uuid4())
     f = request.files['audio_data']
     audio_file_path = '../results/' + session_id + '.wav'
     with open(audio_file_path, 'wb') as audio:
         f.save(audio)
         frame_rate = audio.getframerate()
-    print('file saved successfully')
+    app.logger.info('file saved successfully')
     text = speech_to_text(audio_file_path, 'gs://speech_to_sign_bucket/' + audio_file_path, frame_rate)
 
+    # in case there are no results from the Google api
     if not text:
         return
 
@@ -46,11 +50,16 @@ def speech_to_ASL():
 
 @app.after_request
 def after_request(response):
+    """
+    """
     response.headers.add('Accept-Ranges', 'bytes')
     return response
 
 
 def get_chunk(video_id, byte1=None, byte2=None):
+    """
+    Returns the video in chunks
+    """
     full_path = '../results/' + video_id + '.mp4'
     file_size = os.stat(full_path).st_size
     start = 0
@@ -70,7 +79,10 @@ def get_chunk(video_id, byte1=None, byte2=None):
 
 @app.route("/video/<video_id>")
 def steam_resulting_video(video_id):
-    print(video_id)
+    """
+    Streams the resulting video to the user
+    """
+    app.logger.info('video_id: ' + video_id)
     range_header = request.headers.get('Range', None)
     byte1, byte2 = 0, None
     if range_header:
@@ -91,6 +103,7 @@ def steam_resulting_video(video_id):
 
 if __name__ == "__main__":
     scheduler = BackgroundScheduler()
+    # calls the function delete_files every minute to delete old files
     scheduler.add_job(func=delete_files, trigger="interval", seconds=60)
     scheduler.start()
 

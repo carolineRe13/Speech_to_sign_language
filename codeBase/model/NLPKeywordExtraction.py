@@ -7,6 +7,7 @@ STATE_OF_BEING_VERBS = ['is', 'am', 'was', 'are', 'were', 'being', 'be', 'been']
 def keyword_extraction_removed_from_sentence(text_to_analyse):
     """
         This method filters out words from a text which are not used in ASL
+        Those words are state of being verbs and articles
     """
     natural_language_processor = spacy.load('en_core_web_sm')
     parsed_text = natural_language_processor(text_to_analyse)

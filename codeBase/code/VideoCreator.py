@@ -33,9 +33,9 @@ def concatenate_videos(video_clip_paths, output_folder_path, uuid, method="compo
     final_clip.write_videofile(output_folder_path + '/' + uuid + '.mp4', fps=30, threads=1, codec="libx264")
 
 
-def create_video_with_text(text):
+def create_video_with_text(text, database_path):
     """if a word is missing then we create a video displaying the word"""
-    output_folder_path = '../database/' + text
+    output_folder_path = database_path + text
 
     img = Image.new('RGB', (640, 60), color=(0, 0, 0))
 

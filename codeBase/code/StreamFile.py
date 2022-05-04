@@ -32,7 +32,9 @@ def get_chunk(byte1=None, byte2=None):
 
 @app.route('/video')
 def get_file():
-    """"""
+    """
+    Stream of the resulting video.
+    """
     range_header = request.headers.get('Range', None)
     byte1, byte2 = 0, None
     if range_header:

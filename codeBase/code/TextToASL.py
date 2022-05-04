@@ -2,14 +2,14 @@ import os.path
 import random
 
 
-from codeBase.VideoCreator import create_video_with_text
+from codeBase.code.VideoCreator import create_video_with_text
 
 
 def video_paths(text):
     """Returns video paths to all the words in text"""
     words = text.split(' ')
 
-    return test(words, 0, '../database', '../database', '')
+    return test(words, 0, '../database', '../../database', '')
 
 
 def test(words, index, database, path, sign):
@@ -25,7 +25,6 @@ def test(words, index, database, path, sign):
         os.mkdir(current_path)
 
     folder_content = os.listdir(current_path)
-    print('folder_content', folder_content)
     subfolders = list(filter(lambda item: not item.endswith('.mp4'), folder_content))
     videos = list(filter(lambda item: item.endswith('.mp4'), folder_content))
 
@@ -36,7 +35,7 @@ def test(words, index, database, path, sign):
     elif len(videos) == 0:
         # app.logger.info('Creating (', sign, ') in database')
         print('Creating (', sign, ') in database')
-        results = [create_video_with_text(sign)]
+        results = [create_video_with_text(sign), '../database/']
         results.extend(test(words, index + 1, database, database, ''))
         return results
     else:

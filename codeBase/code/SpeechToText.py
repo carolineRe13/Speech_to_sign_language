@@ -6,6 +6,7 @@ from google.cloud import storage
 
 
 def implicit():
+    # personal access, replace with access to your project json
     credential_path = r"C:\Users\Caroline\Documents\speechtosignlanguage-f7bb5dfe5dce.json"
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
 
@@ -26,7 +27,9 @@ def upload_blob(bucket_name, source_file_name, destination_blob_name):
 
 
 def speech_to_text(audio_file_name, gcs_uri, frame_rate):
-    """ Converts speech to text by using the Google api. """
+    """ Converts speech to text by using the Google api.
+    Text with highest confidence is returned or an empty string if there are no results.
+    """
     response_with_highest_confidence = None
     implicit()
 

@@ -1,38 +1,32 @@
 import os
 
 from google.cloud import speech
-from google.cloud import storage
+
+from flask import current_app, g
 
 
-def implicit():
-    # personal access, replace with access to your project json
-    credential_path = "../keys/googleCloud.json"
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
-
-
-def upload_blob(app, bucket_name, source_file_name, destination_blob_name):
+def upload_blob(bucket_name, source_file_name, destination_blob_name):
     """ Uploads a file to the Google bucket. """
 
-    storage_client = storage.Client()
+    storage_client = g.storage_client
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
 
     blob.upload_from_filename(source_file_name)
 
-    app.logger.info(
+    current_app.logger.info(
         "File {} uploaded to {}.".format(
             source_file_name, destination_blob_name)
     )
 
 
-def speech_to_text(app, audio_file_name, gcs_uri, frame_rate):
+def speech_to_text(audio_file_name, gcs_uri, frame_rate):
     """ Converts speech to text by using the Google api.
     Text with highest confidence is returned or an empty string if there are no results.
     """
-    implicit()
+    upload_blob("speech_to_sign_bucket", audio_file_name, os.path.basename(gcs_uri))
 
-    upload_blob(app, "speech_to_sign_bucket", audio_file_name, os.path.basename(gcs_uri))
-    client = speech.SpeechClient()
+    client = g.speech_client
 
     audio = speech.RecognitionAudio(uri=gcs_uri)
 

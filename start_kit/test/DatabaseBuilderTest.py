@@ -10,7 +10,7 @@ class DatabaseBuilder(unittest.TestCase):
         database_path = 'database/'
         create_video_with_text('test', database_path)
         self.assertEqual(os.path.exists(database_path + '/test/text.mp4'), True)
-        create_or_update_database('/database')
+        create_or_update_database("", '/database')
         # if os.path.exists(database_path):
         #    os.rmdir(database_path)
 

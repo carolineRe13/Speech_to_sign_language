@@ -3,5 +3,6 @@
 *.xml
 /database
 *__pycache__
+*.pytest_cache
 /keys/*
 *.mp4

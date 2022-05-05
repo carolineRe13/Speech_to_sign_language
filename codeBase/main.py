@@ -3,7 +3,7 @@ import re
 import uuid
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask, Response
+from flask import Flask, Response, g
 from flask import request
 from flask_cors import CORS
 
@@ -14,11 +14,45 @@ from model.NLPKeywordExtraction import keyword_extraction_removed_from_sentence
 from codeBase.code.SpeechToText import speech_to_text
 from scipy.io.wavfile import read as read_wav
 
+from google.cloud import speech
+from google.cloud import storage
+
 import atexit
 
 VIDEO_RESULTS_FOLDER = '../results'
 
-app = Flask(__name__)
+
+def get_speech_client():
+    if 'speech_client' not in g:
+        g.speech_client = speech.SpeechClient()
+
+    return g.speech_client
+
+
+def get_storage_client():
+    if 'storage_client' not in g:
+        g.storage_client = storage.Client()
+
+    return g.storage_client
+
+
+def create_app():
+    # personal access, replace with access to your project json
+    credential_path = "../keys/googleCloud.json"
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credential_path
+
+    appp = Flask(__name__)
+
+    return appp
+
+
+app = create_app()
+
+
+@app.teardown_appcontext
+def teardown_speech_client(exception):
+    g.pop('speech_client', None)
+    g.pop('storage_client', None)
 
 
 @app.route("/speech_to_ASL", methods=['POST'])
@@ -26,15 +60,17 @@ def speech_to_ASL():
     """
     Saves the recorded voice message and returns a unique video_id to identify the session
     """
+    get_speech_client()
+    get_storage_client()
     session_id = str(uuid.uuid4())
     f = request.files['audio_data']
     audio_file_name = session_id + '.wav'
     audio_file_path = '../results/' + audio_file_name
     with open(audio_file_path, 'wb') as audio:
         f.save(audio)
-        sampling_rate, data = read_wav(audio_file_path)
+    sampling_rate, data = read_wav(audio_file_path)
     app.logger.info('file saved successfully')
-    text = speech_to_text(app, audio_file_path, 'gs://speech_to_sign_bucket/' + audio_file_name, sampling_rate)
+    text = speech_to_text(audio_file_path, 'gs://speech_to_sign_bucket/' + audio_file_name, sampling_rate)
 
     # in case there are no results from the Google api
     if not text:

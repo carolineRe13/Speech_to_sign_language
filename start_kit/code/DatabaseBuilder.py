@@ -1,7 +1,6 @@
 import json
 
 from moviepy.editor import *
-from flask import app
 
 
 # install ImageMagick
@@ -31,16 +30,13 @@ def add_text_to_video(file_path, dst, subtitle):
 
 
 # could replace generated text videos
-def create_or_update_database(path):
+def create_or_update_database(path_to_json, path_to_videos_folder):
     """ Adds videos to the db
     For every word, a folder is created. If a sign consists of more words, then the folders are created as tree
     hierarchies. For example; don't want has the folder structure: don't (can have videos for don't) -> want (has videos
     for don't want)
     If the word has a text generated video without sign, then its replaced by a sign video
     """
-    args = sys.argv[1:]
-    path_to_json = args[0]
-    path_to_videos_folder = args[1]
 
     with open(path_to_json, 'r') as jsonFile:
         json_content = json.load(jsonFile)
@@ -48,9 +44,9 @@ def create_or_update_database(path):
         for word in json_content:
             current_word = word['gloss']
 
-            app.logger.info(current_word + ' will be added')
+            print(current_word + ' will be added')
 
-            dst = path + '/'.join(current_word.split(' '))
+            dst = path_to_videos_folder + '/'.join(current_word.split(' '))
 
             if not os.path.exists(dst):
                 os.makedirs(dst)
@@ -71,12 +67,14 @@ def create_or_update_database(path):
                 os.remove(dst + 'text.mp4')
 
             if i == 0:
-                app.logger.info('no videos for', current_word)
+                print('no videos for', current_word)
                 if len(os.listdir(dst)) == 0:
                     os.rmdir(dst)
             else:
-                app.logger.info('video added for ', current_word)
+                print('video added for ', current_word)
 
 
 if __name__ == "__main__":
-    create_or_update_database('../../database/')
+    args = sys.argv[1:]
+
+    create_or_update_database(args[0], args[1])

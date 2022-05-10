@@ -9,7 +9,7 @@ from flask_cors import CORS
 
 from codeBase.code.TextToASL import video_paths
 from codeBase.code.VideoCreator import concatenate_videos
-from codeBase.util.DeleteOldFiles import delete_files
+from codeBase.util.DeleteOldFiles import delete_old_files
 from model.NLPKeywordExtraction import keyword_extraction_removed_from_sentence
 from codeBase.code.SpeechToText import speech_to_text
 from scipy.io.wavfile import read as read_wav
@@ -142,7 +142,7 @@ def steam_resulting_video(video_id):
 if __name__ == "__main__":
     scheduler = BackgroundScheduler()
     # calls the function delete_files every minute to delete old files
-    scheduler.add_job(func=delete_files, trigger="interval", seconds=60)
+    scheduler.add_job(func=delete_old_files, trigger="interval", seconds=60)
     scheduler.start()
 
     cors = CORS(app, origins="*", send_wildcard=True, expose_headers='*')

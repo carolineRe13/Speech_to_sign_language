@@ -3,7 +3,7 @@ import json
 from moviepy.editor import *
 
 
-# install ImageMagick
+# install ImageMagick as it is required to write text with the moviepy library
 def add_text_to_video(file_path, dst, subtitle):
     """ Adds the name of the video folder as subtitle over the video duration
     Unfortunately, there is a bug in ffmpeg_reader.py
@@ -29,7 +29,6 @@ def add_text_to_video(file_path, dst, subtitle):
                           codec="mpeg4", audio_codec="aac")
 
 
-# could replace generated text videos
 def create_or_update_database(path_to_json, path_to_videos_folder):
     """ Adds videos to the db
     For every word, a folder is created. If a sign consists of more words, then the folders are created as tree
@@ -74,6 +73,7 @@ def create_or_update_database(path_to_json, path_to_videos_folder):
                 print('video added for ', current_word)
 
 
+# A detailed description to the required parameter configurations can be found in the ReadMe.md
 if __name__ == "__main__":
     args = sys.argv[1:]
 

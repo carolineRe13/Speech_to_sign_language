@@ -50,10 +50,10 @@ def test_request_example(MockStorage, MockSpeech, MockOperation, client):
 
         video_id = literal_eval(response.data.decode('utf-8'))["video_id"]
 
-        print("video id", video_id)
-
         response = client.get("/video/" + video_id)
         assert response.status_code == 206
+
+
 
 
 class Response:
